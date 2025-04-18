@@ -185,13 +185,13 @@ If camera locations are not very precise (i.e., sub-pixel accuracy), you may end
 ![Example of a mesh surface before (top) and after (bottom) the smoothing step with strength 3. Solid shading was chosen to enhance visibility of artefacts.](figs/before_after_smooth.png){width=50%, height=75%}
 
 
-
 ### Quality assessment
 
 ![Overview of confidence values for a mesh model. The red and green colors indicate a lower number of image pairs that were used to generate depth maps. This usually suggests that camera alignment has not been perfect. This may result in rough mesh surfaces or in unconnected mesh segments. A smoothing filter will reduce that effect.](figs/mesh_confidence_overview.png){width=50%, height=50%}
 
 ![Zoom-in of the confidence values for a pebble with a smooth surface. It is expected that mesh triangles pointing downward have a low number of pairs (red colors), but the green colors on the upward facing mesh triangles indicate that not all depth map pairs have been properly aligned. The smoothing step may help to reduce the spikes on the mesh surface that result from this misalignment.](figs/mesh_confidence.png){width=50%, height=50%}
 
+![Typical effects of rough (or noisy) mesh surfaces stemming from the imprecise camera alignment and resulting depth maps (top). Applying a smoothing filter will remove some of these artefacts.](figs/unfiltered_filtered_mesh.jpg){width=50%, height=75%}
 
 # Metashape Python script
 
