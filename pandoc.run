@@ -1,0 +1,3 @@
+pandoc MetashapeAgisoft_from_photos_to_meshes.md -o MetashapeAgisoft_from_photos_to_meshes.pdf \
+  --from markdown --template eisvogel --listings --number-sections -V lang=en-US \
+  -V colorlinks=true -V linkcolor=cyan
