@@ -143,7 +143,7 @@ def filter_compbined95p_sparse_pc(chunk, percentile=95):
     f.removePoints(projacc)
 
 
-def calculate_covariance_parameters(chunk, fname="Points_covariance0.csv.gz"):
+def calculate_covariance_parameters(chunk):
     # see also: https://www.agisoft.com/forum/index.php?topic=11218.msg50653#msg50653
     print("calculate covariances in scaled local coordinates")
     T = chunk.transform.matrix
@@ -393,42 +393,95 @@ for i in range(nr_of_chunks):
         adaptive_fitting=True,
         tiepoint_covariance=True,
     )
-    # print('Calculate variance and covariance for every tie point (SIFT feature)')
-    # track_ids, coords, var, vect = calculate_covariance_parameters(chunk)
+    print("Calculate variance and covariance for every tie point (SIFT feature)")
+    track_ids, coords, var, vect = calculate_covariance_parameters(chunk)
     #
     # fname = os.path.join(path2save, '%s_tiepoints_covariances2_f.csv.gz'%dirname)
     # print('Saving Projection uncertainties and covariance to %s'%fname)
     # np.savetxt(fname, np.c_[track_ids, coords, var, vect], delimiter=',',
     #     header='trackid, x, y, z, var, cov_x, cov_y, cov_z',  fmt='%d, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f' )
 
-    # # Get all values for filtering and store to matrix
-    # f = Metashape.TiePoints.Filter();
-    # f.init(chunk, Metashape.TiePoints.Filter.ReprojectionError)
-    # reperr_values = f.values.copy()
-    # f = Metashape.TiePoints.Filter();
-    # f.init(chunk, Metashape.TiePoints.Filter.ReconstructionUncertainty)
-    # recunc_values = f.values.copy()
-    # f = Metashape.TiePoints.Filter();
-    # f.init(chunk, Metashape.TiePoints.Filter.ImageCount)
-    # imgcount_values = f.values.copy()
-    # f = Metashape.TiePoints.Filter()
-    # f.init(chunk, Metashape.TiePoints.Filter.ProjectionAccuracy)
-    # projacc_values = f.values.copy()
-    #
-    # print('Saving Projection uncertainties and covariance to %s'%fname)
-    # fname=os.path.join(path2save, '%s_tiepoints_covariances2_errors_f.csv.gz'%dirname)
-    # np.savetxt(fname, np.c_[track_ids, coords, var, vect, reperr_values, recunc_values, imgcount_values, projacc_values], delimiter=',',
-    #     header='trackid, x, y, z, var, cov_x, cov_y, cov_z, reprojection_error, reconstruction_uncertainty, image_count, projection_accuracy',
-    #     fmt='%d, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %d, %.5f' )
+    # Get all values for filtering and store to matrix
+    f = Metashape.TiePoints.Filter()
+    f.init(chunk, Metashape.TiePoints.Filter.ReprojectionError)
+    reperr_values = f.values.copy()
+    f = Metashape.TiePoints.Filter()
+    f.init(chunk, Metashape.TiePoints.Filter.ReconstructionUncertainty)
+    recunc_values = f.values.copy()
+    f = Metashape.TiePoints.Filter()
+    f.init(chunk, Metashape.TiePoints.Filter.ImageCount)
+    imgcount_values = f.values.copy()
+    f = Metashape.TiePoints.Filter()
+    f.init(chunk, Metashape.TiePoints.Filter.ProjectionAccuracy)
+    projacc_values = f.values.copy()
 
-    Metashape.app.document.save()
-    # crs = PhotoScan.CoordinateSystem('LOCAL_CS["Local Coordinates",LOCAL_DATUM["Local Datum",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]]]')
-    # chunk.exportPoints("d:\test.ply", source = PhotoScan.DataSource.PointCloudData, format = PhotoScan.PointsFormatPLY, crs=crs)
-    # chunk.exportReport(output_folder + '/report.pdf')
+    fname = os.path.join(path2save, "%s_tiepoints_covariances_errors.csv.gz" % dirname)
+    print("Saving Projection uncertainties and covariance to %s" % fname)
+    np.savetxt(
+        fname,
+        np.c_[
+            track_ids,
+            coords,
+            var,
+            vect,
+            reperr_values,
+            recunc_values,
+            imgcount_values,
+            projacc_values,
+        ],
+        delimiter=",",
+        header="trackid, x, y, z, var, cov_x, cov_y, cov_z, reprojection_error, reconstruction_uncertainty, image_count, projection_accuracy",
+        fmt="%d, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %.5f, %d, %.5f",
+    )
 
     crs = Metashape.CoordinateSystem(
         'LOCAL_CS["Local Coordinates",LOCAL_DATUM["Local Datum",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]]]'
     )
+
+    fname = os.path.join(path2save, "%s_camera_locations.csv" % dirname)
+    chunk.exportReference(
+        path=fname,
+        format=Metashape.ReferenceFormatCSV,
+        items=Metashape.ReferenceItemsCameras,
+        columns="nuvwpqrdefijk",
+        # n - label, o - enabled flag, x/y/z - coordinates, X/Y/Z - coordinate accuracy, a/b/c - rotation angles,
+        # A/B/C - rotation angle accuracy, u/v/w - estimated coordinates, U/V/W - coordinate errors,
+        # d/e/f - estimated orientation angles, D/E/F - orientation errors,
+        # p/q/r - estimated coordinates variance, i/j/k - estimated orientation angles variance,
+        # [] - group of multiple values, | - column separator within group
+        delimiter=",",
+        precision=6,
+    )
+
+    #     fname = os.path.join(path2save, "%s_cameras.csv" % dirname)
+    #     chunk.exportCameras(
+    #         path=fname,
+    #         format=CamerasFormatXML,
+    #         crs=crs,
+    #         save_points=True,
+    #         save_markers=False,
+    #         save_invalid_matches=False,
+    #         save_absolute_paths=False,
+    #         use_labels=False,
+    #         use_initial_calibration=False,
+    #         image_orientation=0,
+    #         chan_rotation_order=RotationOrderXYZ,
+    #         binary=False,
+    #         bundler_save_list=True,
+    #         bundler_path_list="list.txt",
+    #         bingo_save_image=True,
+    #         bingo_save_itera=True,
+    #         bingo_save_geoin=True,
+    #         bingo_save_gps=False,
+    #         bingo_path_itera="itera.dat",
+    #         bingo_path_image="image.dat",
+    #         bingo_path_geoin="geoin.dat",
+    #         bingo_path_gps="gps-imu.dat",
+    #     )
+    Metashape.app.document.save()
+
+    # chunk.exportPoints("d:\test.ply", source = PhotoScan.DataSource.PointCloudData, format = PhotoScan.PointsFormatPLY, crs=crs)
+    # chunk.exportReport(output_folder + '/report.pdf')
 
     if not chunk.depth_maps:
         print("build depth maps for %s" % dirname)
@@ -493,8 +546,9 @@ for i in range(nr_of_chunks):
                 stats.faces, stats.components
             )
         )
-        chunk.model.decimateModel(face_count=10000000)
-        chunk.model.smoothModel(strength=3)
+        # you may need to clip the area first before decimating and smoothing
+        chunk.decimateModel(face_count=10000000)
+        chunk.smoothModel(strength=3)
 
         # print('build 3D tiled model from depth maps for %s'%dirname)
         # pixel size is in m - using 0.1 mm

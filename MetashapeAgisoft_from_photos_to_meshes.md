@@ -14,6 +14,16 @@ Metashape Agisoft allows to generate meshes (called model in Metashape) after th
 
 The below steps and guidelines are suggestions. Scenes with different boundary conditions may require different approaches or different parameters. There exist different strategies on successful processing for 3D virtual outcrop generation. The strategies depend on number of photos, their quality, if marker and scaling boards are used and several other factors. There is no 'one size fits all' solution. In the following document we list several guidelines for successful processing. These may need to be adopted to your needs.
 
+## Additional resources
+
+- Metashape Agisoft Tutorials: https://www.agisoft.com/support/tutorials/
+- Metashape Agisoft Documentation: https://www.agisoft.com/pdf/metashape-pro_2_0_en.pdf
+- Metashape Agisoft User Manuals: https://www.agisoft.com/downloads/user-manuals/
+- Metashape Agisoft Python reference: https://www.agisoft.com/pdf/metashape_python_api_2_1_3.pdf
+- Metashape Agisoft github repository: https://github.com/agisoft-llc/metashape-scripts
+- https://github.com/VietDucNg/Metashape-photogrammetry
+- USGS Agisoft Metashape/Photoscan Automated Image Alignment and Error Reduction version 2.0 https://www.usgs.gov/software/agisoft-metashapephotoscan-automated-image-alignment-and-error-reduction-version-20 and associated python code: https://code.usgs.gov/pcmsc/AgisoftAlignmentErrorReduction/-/tree/v2.0 **Note that these steps are aimed at optimizing UAV (nadir) images.**
+
 
 ## Overview of steps
 
@@ -124,7 +134,7 @@ One approach relies on a large number of tie points that are subsequently filter
 
 
 #### Reprojection error
-Maximum reprojection error is calculated in normalized units for all images where the tie point was found and measured.
+Maximum reprojection error is calculated in normalized units for all images where a tie point was found.
 
 $$\max_i |x'_i - x_i | / s_i$$
 
@@ -146,7 +156,7 @@ $\lambda_1$ is the largest eigenvalue of the tie-point covariance matrix and $\l
 
 High reconstruction uncertainty is typical for points reconstructed from nearby photos with small baseline. Such points can noticeably deviate from the object surface, introducing noise in the point cloud. While removal of such points should not affect the accuracy of optimization, it may be useful to remove them before building models or point cloud geometries. 
 
-Example: In case you have only two cameras and a point is being triangulated by intersection of two rays there is a direction in which the variation for the point position is maximal and another direction with the minimal variation (l1 and l3 above). Dividing one by the other (max to min) will give you the reconstruction uncertainty value. 
+Example: In case you have only two cameras and a point is being triangulated by intersection of two rays there is a direction in which the variation for the point position is maximal and another direction with the minimal variation ($\lambda_1$ and $\lambda_3$ above). Dividing one by the other (max to min) will give you the reconstruction uncertainty value. Reconstruction uncertainty is inversely related to the image-pair baseline: if all images that contribute to determining the 3D position of a point are very close together, relative to the distance of that point, then the uncertainty is high (although the reprojection error may well be low). Reconstruction uncertainty is unrelated to how well the cameras are aligned/modelled. It is reflecting the ratio between XY uncertainty and Z uncertainty. If the XY accuracy (usually $\lambda_1$ is equal to the Z accuracy (usually $\lambda_3$) then you get an reconstruction uncertainty of 1. A reconstruction uncertainty of 10 implies that $\lambda_1$ is 10 times as large as $\lambda_3$.
 
 You are aiming at a value of 10 or lower. A range of 8 to 10 is likely a reasonable goal.
 
@@ -161,7 +171,7 @@ Remove all tie points with an image count of 2.
 #### Projection Accuracy
 Average image scale that was used for measuring coordinates of the projections of the tie-point.
 
-$$s_i  / n$$
+$$s_i / n$$
 
 where
 $s_i$ is the scale of the image that was used for measuring the coordinates of the corresponding projection on the i-th image and $n$ is the number of images where the tie point was found. 
